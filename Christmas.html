@@ -433,6 +433,7 @@
       }
     };
   }
+
   var snowManager = snow();
 
   // 全局暴露snow管理器，方便后续清理
@@ -464,7 +465,6 @@
       "#446D39",
     ],
     particleTypeArray = ["#star", "#circ", "#cross", "#heart"],
-    // particleTypeArray = ['#star'],
     particlePool = [],
     particleCount = 0,
     numParticles = 201;
@@ -489,23 +489,16 @@
       if (value % 2) {
         arr.push(obj);
       }
-      //console.log(value)
     });
-
     return arr;
   };
+
   let treePath = getSVGPoints(".treePath");
-
   var treeBottomPath = getSVGPoints(".treeBottomPath");
-
-  //console.log(starPath.length)
   var mainTl = gsap.timeline({ delay: 0, repeat: 0 }),
     starTl;
 
-  //tl.seek(100).timeScale(1.82)
-
   function flicker(p) {
-    //console.log("flivker")
     gsap.killTweensOf(p, { opacity: true });
     gsap.fromTo(
       p,
@@ -521,8 +514,6 @@
   }
 
   function createParticles() {
-    //var step = numParticles/starPath.length;
-    //console.log(starPath.length)
     var i = numParticles,
       p,
       particleTl,
@@ -582,12 +573,10 @@
       onRepeatParams: [p],
     });
 
-    //
-    //particlePool[particleCount].play();
     particleCount++;
-    //mainTl.add(tl, i / 1.3)
     particleCount = particleCount >= numParticles ? 0 : particleCount;
   }
+
   // 圣诞树开始绘画时小光点动画
   function drawStar() {
     starTl = gsap.timeline({ onUpdate: playParticle });
@@ -634,11 +623,7 @@
         },
         "-=2"
       );
-
-    //gsap.staggerTo(particlePool, 2, {})
-  }
-  ;
-  //ScrubGSAPTimeline(mainTl)
+  };
 
   function drawMain() {
 
@@ -691,8 +676,6 @@
     opacity: 0
     }, '+=2') */
   }
-
-
 
   function drawStars() {
     let canvas = document.getElementById("stars"),
@@ -828,7 +811,6 @@
     animation();
   }
 
-
   let myLabels = [
     "陈美霞 宝贝～🎄💎❄️",
     "Merry Christmas",
@@ -852,10 +834,52 @@
       }, 1000 * i);
     }
   }
+
   let init_flag = false;
+
   // music
-  let music_url = "https://cdn.pixabay.com/audio/2025/12/21/audio_681ef37199.mp3";
+  let music_url = "https://navigation-1256354221.cos.ap-shanghai.myqcloud.com/Christmas/Christmas.mp3";
   let _music = new Audio(music_url);
+
+  // 页面加载后自动播放音乐
+  window.addEventListener('DOMContentLoaded', function () {
+    // 尝试自动播放音乐
+    const attemptPlay = () => {
+      _music.play().then(() => {
+        console.log('音乐自动播放成功');
+      }).catch((error) => {
+        console.log('音乐自动播放失败，需要用户交互:', error);
+        // 如果自动播放失败，在用户首次交互时播放
+        const playOnFirstInteraction = () => {
+          if (!_music.paused) return;
+          _music.play().then(() => {
+            console.log('用户交互后音乐播放成功');
+          }).catch((e) => {
+            console.log('用户交互后音乐播放失败:', e);
+          });
+          // 移除事件监听器
+          document.removeEventListener('click', playOnFirstInteraction);
+          document.removeEventListener('touchstart', playOnFirstInteraction);
+        };
+
+        // 监听首次用户交互
+        document.addEventListener('click', playOnFirstInteraction, { once: true });
+        document.addEventListener('touchstart', playOnFirstInteraction, { once: true, passive: true });
+        // 针对微信环境的自动播放黑科技
+        document.addEventListener("WeixinJSBridgeReady", function () {
+          _music.play();
+        }, false);
+      });
+    };
+
+    // 尝试播放音乐
+    attemptPlay();
+
+    // 设置音乐循环播放
+    _music.loop = true;
+    _music.volume = 0.5; // 设置合适的音量
+  });
+
   // 全局resize和orientationchange处理器
   let globalResizeTimeout;
   const handleGlobalResize = function () {
@@ -879,7 +903,7 @@
   const handleStartInteraction = function (e) {
     if (init_flag) return;
     init_flag = true;
-    _music.play();
+
     init();
     let mask = document.getElementById("mask");
     if (mask) {
